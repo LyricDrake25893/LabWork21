@@ -1,0 +1,33 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="LabWork21.FilmsPage"
+             Title="Фильмы">
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="10" RowSpacing="10">
+        <Entry x:Name="SearchEntry" Grid.Row="0"
+               Placeholder="Часть названия"
+               TextChanged="OnChanged" />
+        <Picker x:Name="SortPicker" Grid.Row="1"
+                Title="Сортировка"
+                SelectedIndexChanged="OnChanged" />
+        <ListView x:Name="FilmsList" Grid.Row="2" HasUnevenRows="True">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <VerticalStackLayout Padding="5">
+                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                            <Label Text="{Binding Id, StringFormat='Id: {0}'}" />
+                            <Label Text="{Binding Time, StringFormat='Длительность: {0} мин'}" />
+                            <Label Text="{Binding ReleaseYear, StringFormat='Год: {0}'}" />
+                            <Label Text="{Binding Description}" />
+                        </VerticalStackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <HorizontalStackLayout Grid.Row="3" Spacing="15" HorizontalOptions="Center">
+            <Button x:Name="PrevBtn" Text="Назад" Clicked="OnPrev" />
+            <Label x:Name="PageLabel" VerticalOptions="Center" />
+            <Button x:Name="NextBtn" Text="Вперёд" Clicked="OnNext" />
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>
