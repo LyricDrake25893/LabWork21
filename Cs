@@ -1,0 +1,78 @@
+using FilmDbLibrary.Data;
+using FilmDbLibrary.Models;
+
+namespace LabWork21;
+
+public partial class FilmsPage : ContentPage
+{
+    List<Film> films = new();
+    int page = 0;           // текущая страница (с 0)
+    const int PageSize = 5; // фильмов на странице
+
+    public FilmsPage()
+    {
+        InitializeComponent();
+
+        using var db = new CinemaDbContext();
+        films = db.Films.ToList();
+
+        SortPicker.ItemsSource = new List<string>
+        {
+            "По названию",
+            "По длительности",
+            "По году выпуска",
+            "По убыванию года выпуска"
+        };
+        SortPicker.SelectedIndex = 0;
+    }
+
+    // изменили поиск или сортировку: возвращаемся на 1 страницу
+    void OnChanged(object sender, EventArgs e)
+    {
+        page = 0;
+        Refresh();
+    }
+
+    void OnPrev(object sender, EventArgs e)
+    {
+        page--;
+        Refresh();
+    }
+
+    void OnNext(object sender, EventArgs e)
+    {
+        page++;
+        Refresh();
+    }
+
+    void Refresh()
+    {
+        IEnumerable<Film> q = films;
+
+        // 3.4 фильтр
+        var text = SearchEntry.Text;
+        if (!string.IsNullOrWhiteSpace(text))
+            q = q.Where(f => f.Name.Contains(text, StringComparison.OrdinalIgnoreCase));
+
+        // 3.3 сортировка
+        q = SortPicker.SelectedIndex switch
+        {
+            1 => q.OrderBy(f => f.Time),
+            2 => q.OrderBy(f => f.ReleaseYear),
+            3 => q.OrderByDescending(f => f.ReleaseYear),
+            _ => q.OrderBy(f => f.Name)
+        };
+
+        var list = q.ToList();
+
+        // постраничный вывод
+        int pages = Math.Max(1, (int)Math.Ceiling(list.Count / (double)PageSize));
+        if (page >= pages) page = pages - 1;
+        if (page < 0) page = 0;
+
+        FilmsList.ItemsSource = list.Skip(page * PageSize).Take(PageSize).ToList();
+        PageLabel.Text = $"Страница {page + 1} из {pages}";
+        PrevBtn.IsEnabled = page > 0;
+        NextBtn.IsEnabled = page < pages - 1;
+    }
+}
